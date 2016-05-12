@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="@dimen/detail_padding"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/detail_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/detail_title_size"
+            tools:text="Charlie"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/detail_movieInfo_marginTop"
+            android:orientation="horizontal">
+            <ImageView
+                android:id="@+id/detail_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/detail_image_marginRight"
+                android:layout_marginEnd="@dimen/detail_image_marginRight"/>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/detail_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/detail_date_size"
+                    tools:text="2015"/>
+                <TextView
+                    android:id="@+id/detail_duration"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/detail_duration_size"
+                    tools:text="120 min"/>
+
+                <TextView
+                    android:id="@+id/detail_rating"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/detail_rating_size"
+                    tools:text="8/10"/>
+
+            </LinearLayout>
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/detail_synopsis_marginTop"
+            android:textSize="@dimen/detail_synopsis"
+            android:text="@string/detail_synopsis"/>
+        <TextView
+            android:id="@+id/detail_synopsis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="lorem ipsum"/>
+
+    </LinearLayout>
+</ScrollView>

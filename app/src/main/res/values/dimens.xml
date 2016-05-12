@@ -3,4 +3,13 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="detail_title_size">25sp</dimen>
+    <dimen name="detail_padding">16dp</dimen>
+    <dimen name="detail_synopsis">18sp</dimen>
+    <dimen name="detail_synopsis_marginTop">20dp</dimen>
+    <dimen name="detail_movieInfo_marginTop">20dp</dimen>
+    <dimen name="detail_date_size">20sp</dimen>
+    <dimen name="detail_duration_size">18sp</dimen>
+    <dimen name="detail_rating_size">18sp</dimen>
+    <dimen name="detail_image_marginRight">20dp</dimen>
 </resources>

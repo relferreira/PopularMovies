@@ -1,23 +1,26 @@
-package com.relferreira.popularmovies;
+package com.relferreira.popularmovies.Settings;
 
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v7.preference.PreferenceFragmentCompat;
+
+import com.relferreira.popularmovies.R;
 
 /**
  * Created by renan on 11/05/2016.
  */
-public class SettingsActivity extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
+public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+    public void onCreatePreferences(Bundle bundle, String s) {
         addPreferencesFromResource(R.xml.pref_general);
 
-        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_sort_key)));
+        //bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_sort_key)));
     }
 
     @Override

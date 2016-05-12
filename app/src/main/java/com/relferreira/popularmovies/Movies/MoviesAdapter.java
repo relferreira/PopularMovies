@@ -1,4 +1,4 @@
-package com.relferreira.popularmovies;
+package com.relferreira.popularmovies.Movies;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.relferreira.popularmovies.Model.Movie;
+import com.relferreira.popularmovies.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -17,9 +19,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
 
     private List<Movie> movies;
+    private MoviesListListener listener;
 
-    public MoviesAdapter(List<Movie> movies){
+    public MoviesAdapter(List<Movie> movies, MoviesListListener listener){
         this.movies = movies;
+        this.listener = listener;
     }
 
     @Override
@@ -54,6 +58,13 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             super(itemView);
 
             movieImage = (ImageView) itemView.findViewById(R.id.movie_image);
+
+            movieImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onMovieSelect(getAdapterPosition());
+                }
+            });
         }
     }
 }
