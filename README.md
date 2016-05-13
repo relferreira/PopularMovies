@@ -4,7 +4,7 @@ Project for the Udacity Nanodegree Program.
 
 ## API
 
-To run the project, open the url.xml file and informe your "themoviedb" api key.
+To run the project, open the url.xml file and inform your "themoviedb" api key.
 
 ###Description
 
