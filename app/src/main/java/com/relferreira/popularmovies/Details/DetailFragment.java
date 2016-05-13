@@ -61,16 +61,13 @@ public class DetailFragment extends Fragment {
     }
 
     private void setValues(){
-        movieTitle.setText(movie.getName());
-        movieDate.setText(movie.getDate());
-        movieDuration.setText(movie.getDuration());
-        movieRating.setText(movie.getRating());
-        movieSynopsis.setText(movie.getSynopsis());
+        movieTitle.setText(movie.getTitle());
+        movieDate.setText(movie.getReleaseDate());
+        movieRating.setText(String.valueOf(movie.getVoteAverage()));
+        movieSynopsis.setText(movie.getOverview());
 
         Picasso.with(getContext())
-                .load(movie.getImageUrl())
-                /*.placeholder(R.drawable.user_placeholder)
-                .error(R.drawable.user_placeholder_error)*/
+                .load(getContext().getString(R.string.api_images) + movie.getPosterPath())
                 .into(movieImage);
     }
 }

@@ -8,7 +8,7 @@
 
     <string-array name="pref_sorts_values">
         <item>popular</item>
-        <item>rated</item>
+        <item>top_rated</item>
     </string-array>
 
 </resources>

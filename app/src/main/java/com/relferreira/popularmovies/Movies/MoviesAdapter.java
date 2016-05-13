@@ -1,5 +1,6 @@
 package com.relferreira.popularmovies.Movies;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,10 +19,12 @@ import java.util.List;
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
 
 
+    private Context context;
     private List<Movie> movies;
     private MoviesListListener listener;
 
-    public MoviesAdapter(List<Movie> movies, MoviesListListener listener){
+    public MoviesAdapter(Context context, List<Movie> movies, MoviesListListener listener){
+        this.context = context;
         this.movies = movies;
         this.listener = listener;
     }
@@ -38,9 +41,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         Movie movie = movies.get(position);
 
         Picasso.with(holder.movieImage.getContext())
-                .load(movie.getImageUrl())
-                /*.placeholder(R.drawable.user_placeholder)
-                .error(R.drawable.user_placeholder_error)*/
+                .load(context.getString(R.string.api_images) + movie.getPosterPath())
                 .into(holder.movieImage);
 
     }
