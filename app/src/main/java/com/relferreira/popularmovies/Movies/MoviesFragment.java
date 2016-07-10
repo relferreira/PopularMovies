@@ -1,5 +1,6 @@
 package com.relferreira.popularmovies.Movies;
 
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
@@ -17,6 +18,9 @@ import com.relferreira.popularmovies.Details.DetailActivity;
 import com.relferreira.popularmovies.Model.Movie;
 import com.relferreira.popularmovies.Model.MovieResponse;
 import com.relferreira.popularmovies.R;
+import com.relferreira.popularmovies.data.MovieColumns;
+import com.relferreira.popularmovies.data.PopularMoviesProvider;
+
 import java.util.ArrayList;
 import java.util.List;
 import retrofit2.Call;
@@ -48,6 +52,21 @@ public class MoviesFragment extends Fragment implements MoviesListListener {
         RecyclerView moviesList = (RecyclerView) rootView.findViewById(R.id.movies_list);
         moviesList.setLayoutManager(new GridLayoutManager(getActivity(), NUM_COLUMNS));
         moviesList.setAdapter(adapter);
+//
+//        ContentValues values = new ContentValues();
+//        values.put(MovieColumns.TITLE, "Teste");
+//        values.put(MovieColumns.MOVIE_ID, 1);
+//        values.put(MovieColumns.ORIGINAL_LANGUAGE, "english");
+//        values.put(MovieColumns.ORIGINAL_TITLE, "teste original");
+//        values.put(MovieColumns.OVERVIEW, "Teste para ver como fica");
+//        values.put(MovieColumns.POPULARITY, 10.3);
+//        values.put(MovieColumns.POSTER_PATH, "teste para ver");
+//        values.put(MovieColumns.RELEASE_DATE, "13/03/1992");
+//        values.put(MovieColumns.VOTE_AVERAGE, 9);
+//        values.put(MovieColumns.VOTE_COUNT, 100);
+//        values.put(MovieColumns.ADULT, false);
+//
+//        getActivity().getContentResolver().insert(PopularMoviesProvider.Movies.CONTENT_URI, values);
 
         return rootView;
     }

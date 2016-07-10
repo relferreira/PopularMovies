@@ -9,6 +9,7 @@ import android.view.MenuItem;
 
 import com.relferreira.popularmovies.R;
 import com.relferreira.popularmovies.Settings.SettingsActivity;
+import com.relferreira.popularmovies.sync.MoviesSyncAdapter;
 
 public class MoviesActivity extends AppCompatActivity {
 
@@ -18,6 +19,8 @@ public class MoviesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movies);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        MoviesSyncAdapter.initializeSyncAdapter(this);
 
     }
 

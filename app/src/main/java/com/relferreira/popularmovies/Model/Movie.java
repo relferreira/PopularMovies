@@ -34,6 +34,8 @@ public class Movie implements Parcelable {
     @SerializedName("vote_average")
     private float voteAverage;
 
+    private String type;
+
     public String getPosterPath() {
         return posterPath;
     }
@@ -146,6 +148,14 @@ public class Movie implements Parcelable {
         this.voteAverage = voteAverage;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     protected Movie(Parcel in) {
         posterPath = in.readString();
         adult = in.readByte() != 0x00;
@@ -166,6 +176,7 @@ public class Movie implements Parcelable {
         voteCount = in.readInt();
         video = in.readByte() != 0x00;
         voteAverage = in.readFloat();
+        type = in.readString();
     }
 
     @Override
@@ -194,6 +205,7 @@ public class Movie implements Parcelable {
         dest.writeInt(voteCount);
         dest.writeByte((byte) (video ? 0x01 : 0x00));
         dest.writeFloat(voteAverage);
+        dest.writeString(type);
     }
 
     @SuppressWarnings("unused")
