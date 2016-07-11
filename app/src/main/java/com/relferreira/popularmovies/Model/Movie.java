@@ -1,9 +1,11 @@
 package com.relferreira.popularmovies.Model;
 
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
+import com.relferreira.popularmovies.data.MovieColumns;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +37,9 @@ public class Movie implements Parcelable {
     private float voteAverage;
 
     private String type;
+
+    public Movie() {
+    }
 
     public String getPosterPath() {
         return posterPath;
@@ -154,6 +159,26 @@ public class Movie implements Parcelable {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public static Movie fromCursor(Cursor cursor) {
+        Movie movie = new Movie();
+        movie.setPosterPath(cursor.getString(cursor.getColumnIndex(MovieColumns.POSTER_PATH)));
+        movie.setAdult(cursor.getInt(cursor.getColumnIndex(MovieColumns.ADULT)) == 1);
+        movie.setOverview(cursor.getString(cursor.getColumnIndex(MovieColumns.OVERVIEW)));
+        movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(MovieColumns.RELEASE_DATE)));
+        movie.setId(cursor.getInt(cursor.getColumnIndex(MovieColumns.MOVIE_ID)));
+        movie.setOriginalTitle(cursor.getString(cursor.getColumnIndex(MovieColumns.ORIGINAL_TITLE)));
+        movie.setOriginalLanguage(cursor.getString(cursor.getColumnIndex(MovieColumns.ORIGINAL_LANGUAGE)));
+        movie.setTitle(cursor.getString(cursor.getColumnIndex(MovieColumns.TITLE)));
+        movie.setBackdropPath(cursor.getString(cursor.getColumnIndex(MovieColumns.BACKDROP_PATH)));
+        movie.setPopularity(cursor.getFloat(cursor.getColumnIndex(MovieColumns.POPULARITY)));
+        movie.setVoteCount(cursor.getInt(cursor.getColumnIndex(MovieColumns.VOTE_COUNT)));
+        movie.setVideo(cursor.getInt(cursor.getColumnIndex(MovieColumns.VIDEO)) == 1);
+        movie.setVoteAverage(cursor.getFloat(cursor.getColumnIndex(MovieColumns.VOTE_AVERAGE)));
+        movie.setType(cursor.getString(cursor.getColumnIndex(MovieColumns.TYPE)));
+
+        return movie;
     }
 
     protected Movie(Parcel in) {

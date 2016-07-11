@@ -1,6 +1,7 @@
 package com.relferreira.popularmovies.Movies;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.ImageView;
 
 import com.relferreira.popularmovies.Model.Movie;
 import com.relferreira.popularmovies.R;
+import com.relferreira.popularmovies.util.CursorRecyclerViewAdapter;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -16,17 +18,25 @@ import java.util.List;
 /**
  * Created by renan on 10/05/2016.
  */
-public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
-
+public class MoviesAdapter extends CursorRecyclerViewAdapter<MoviesAdapter.MovieViewHolder> {
 
     private Context context;
-    private List<Movie> movies;
     private MoviesListListener listener;
+    private Cursor cursor;
 
-    public MoviesAdapter(Context context, List<Movie> movies, MoviesListListener listener){
+    public MoviesAdapter(Context context, Cursor cursor, MoviesListListener listener) {
+        super(context, cursor);
         this.context = context;
-        this.movies = movies;
+        this.cursor = cursor;
         this.listener = listener;
+    }
+
+    @Override
+    public void onBindViewHolder(MovieViewHolder viewHolder, Cursor cursor) {
+        Movie movie = Movie.fromCursor(cursor);
+        Picasso.with(viewHolder.movieImage.getContext())
+            .load(context.getString(R.string.api_images) + movie.getPosterPath())
+            .into(viewHolder.movieImage);
     }
 
     @Override
@@ -34,21 +44,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_movies, parent, false);
 
         return new MovieViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(MovieViewHolder holder, int position) {
-        Movie movie = movies.get(position);
-
-        Picasso.with(holder.movieImage.getContext())
-                .load(context.getString(R.string.api_images) + movie.getPosterPath())
-                .into(holder.movieImage);
-
-    }
-
-    @Override
-    public int getItemCount() {
-        return movies.size();
     }
 
     public class MovieViewHolder extends RecyclerView.ViewHolder{
