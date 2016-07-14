@@ -101,7 +101,6 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         Log.i(TAG, "Finished loading movies");
-
         this.data = data;
         adapter.swapCursor(data);
     }

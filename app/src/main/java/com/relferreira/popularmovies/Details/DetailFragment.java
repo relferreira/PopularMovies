@@ -1,18 +1,25 @@
 package com.relferreira.popularmovies.Details;
 
+import android.content.ContentValues;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.TextViewCompat;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.relferreira.popularmovies.Model.Movie;
 import com.relferreira.popularmovies.R;
+import com.relferreira.popularmovies.data.MovieColumns;
+import com.relferreira.popularmovies.data.PopularMoviesProvider;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -41,6 +48,7 @@ public class DetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+        setHasOptionsMenu(true);
 
         movie = getArguments().getParcelable(ARG_MOVIE);
 
@@ -48,6 +56,21 @@ public class DetailFragment extends Fragment {
         setValues();
 
         return rootView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_detail, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_favorite:
+                setFavorite();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void findViewById(View view){
@@ -70,4 +93,17 @@ public class DetailFragment extends Fragment {
                 .load(getContext().getString(R.string.api_images) + movie.getPosterPath())
                 .into(movieImage);
     }
+
+    private void setFavorite(){
+        movie.toggleFavorite();
+        ContentValues values = new ContentValues();
+        values.put(MovieColumns.FAVORITE, (movie.isFavorite()) ? 1 : 0);
+
+        getActivity().getContentResolver().update(
+                PopularMoviesProvider.Movies.CONTENT_URI,
+                values,
+                MovieColumns.MOVIE_ID + " = ?",
+                new String[] { String.valueOf(movie.getId()) });
+    }
+
 }

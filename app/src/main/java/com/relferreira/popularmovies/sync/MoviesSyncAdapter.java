@@ -24,6 +24,7 @@ import com.relferreira.popularmovies.data.PopularMoviesProvider;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -121,11 +122,14 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         Context context = getContext();
         String apiKey = context.getString(R.string.api_key);
 
-        String[] types = context.getResources().getStringArray(R.array.pref_sorts_values);
+        ArrayList<String> types = new ArrayList<String>(Arrays.asList(context.getResources().getStringArray(R.array.pref_sorts_values)));
+        //remove favorites
+        types.remove(2);
         List<Movie> movies = new ArrayList<>();
         for (String type : types) {
             Call<MovieResponse> call = MovieServiceClient.getApi(context).listMovies(type, apiKey);
-            List<Movie> responseMovies = call.execute().body().getResults();
+            MovieResponse movieResponse = call.execute().body();
+            List<Movie> responseMovies = movieResponse.getResults();
             for (Movie movie : responseMovies)
                 movie.setType(type);
             movies.addAll(responseMovies);

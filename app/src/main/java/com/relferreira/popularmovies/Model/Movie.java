@@ -35,8 +35,8 @@ public class Movie implements Parcelable {
     private boolean video;
     @SerializedName("vote_average")
     private float voteAverage;
-
     private String type;
+    private boolean favorite;
 
     public Movie() {
     }
@@ -161,6 +161,18 @@ public class Movie implements Parcelable {
         this.type = type;
     }
 
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    public void toggleFavorite(){
+        this.favorite = !this.favorite;
+    }
+
     public static Movie fromCursor(Cursor cursor) {
         Movie movie = new Movie();
         movie.setPosterPath(cursor.getString(cursor.getColumnIndex(MovieColumns.POSTER_PATH)));
@@ -177,6 +189,7 @@ public class Movie implements Parcelable {
         movie.setVideo(cursor.getInt(cursor.getColumnIndex(MovieColumns.VIDEO)) == 1);
         movie.setVoteAverage(cursor.getFloat(cursor.getColumnIndex(MovieColumns.VOTE_AVERAGE)));
         movie.setType(cursor.getString(cursor.getColumnIndex(MovieColumns.TYPE)));
+        movie.setFavorite(cursor.getInt(cursor.getColumnIndex(MovieColumns.FAVORITE)) == 1);
 
         return movie;
     }
@@ -202,6 +215,7 @@ public class Movie implements Parcelable {
         video = in.readByte() != 0x00;
         voteAverage = in.readFloat();
         type = in.readString();
+        favorite = in.readByte() != 0x00;
     }
 
     @Override
@@ -231,6 +245,7 @@ public class Movie implements Parcelable {
         dest.writeByte((byte) (video ? 0x01 : 0x00));
         dest.writeFloat(voteAverage);
         dest.writeString(type);
+        dest.writeByte((byte) (favorite ? 0x01 : 0x00));
     }
 
     @SuppressWarnings("unused")
