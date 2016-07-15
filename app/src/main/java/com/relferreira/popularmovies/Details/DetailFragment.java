@@ -61,6 +61,7 @@ public class DetailFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_detail, menu);
+        menu.findItem(R.id.action_favorite).setIcon((movie.isFavorite()) ? R.drawable.ic_star : R.drawable.ic_star_border);
     }
 
     @Override
@@ -98,7 +99,7 @@ public class DetailFragment extends Fragment {
         movie.toggleFavorite();
         ContentValues values = new ContentValues();
         values.put(MovieColumns.FAVORITE, (movie.isFavorite()) ? 1 : 0);
-
+        getActivity().invalidateOptionsMenu();
         getActivity().getContentResolver().update(
                 PopularMoviesProvider.Movies.CONTENT_URI,
                 values,

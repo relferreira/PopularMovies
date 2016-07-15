@@ -3,6 +3,8 @@ package com.relferreira.popularmovies.Movies;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -29,10 +31,23 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
     public static final int NUM_COLUMNS = 2;
     private static final String TAG = "MoviesFragment";
     private static final int LOADER_ID = 1;
+    private static final String SELECTED_MOVIE = "selected_movie";
 
     private MoviesAdapter adapter;
     private ProgressBar loading;
     private Cursor data;
+    private int selectedMovie;
+    private RecyclerView moviesList;
+
+    public interface MoviesListCallback {
+        void movieSelected(Movie movie);
+    }
+
+
+    public static MoviesFragment newInstance() {
+        return new MoviesFragment();
+    }
+
 
     public MoviesFragment() {
     }
@@ -42,12 +57,14 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
 
-        adapter = new MoviesAdapter(getContext(), null, this);
+        adapter = new MoviesAdapter(getContext(), null, isTwoPainel(), this);
 
         loading = (ProgressBar) rootView.findViewById(R.id.movies_loading);
 
-        RecyclerView moviesList = (RecyclerView) rootView.findViewById(R.id.movies_list);
-        moviesList.setLayoutManager(new GridLayoutManager(getActivity(), NUM_COLUMNS));
+        moviesList = (RecyclerView) rootView.findViewById(R.id.movies_list);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), NUM_COLUMNS);
+        gridLayoutManager.setAutoMeasureEnabled(false);
+        moviesList.setLayoutManager(gridLayoutManager);
         moviesList.setAdapter(adapter);
 
         return rootView;
@@ -56,6 +73,12 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null && isTwoPainel()) {
+            selectedMovie = savedInstanceState.getInt(SELECTED_MOVIE);
+            adapter.setSelectedMovie(selectedMovie);
+            adapter.notifyItemChanged(selectedMovie);
+            moviesList.scrollToPosition(selectedMovie);
+        }
         getLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
@@ -69,9 +92,7 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
     public void onMovieSelect(int position) {
         data.moveToPosition(position);
         Movie movieSelected = Movie.fromCursor(data);
-        Intent intent = new Intent(getActivity(), DetailActivity.class);
-        intent.putExtra(DetailActivity.ARG_MOVIE, movieSelected);
-        startActivity(intent);
+        ((MoviesListCallback) getActivity()).movieSelected(movieSelected);
     }
 
     @Override
@@ -103,6 +124,15 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
         Log.i(TAG, "Finished loading movies");
         this.data = data;
         adapter.swapCursor(data);
+        if(isTwoPainel()) {
+            Handler handler = new Handler();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    onMovieSelect(selectedMovie);
+                }
+            });
+        }
     }
 
     @Override
@@ -110,7 +140,22 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
         adapter.swapCursor(null);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putInt(SELECTED_MOVIE, adapter.getSelectedMovie());
+        super.onSaveInstanceState(outState);
+    }
+
     private void showLoading(boolean state){
         loading.setVisibility((state) ? View.VISIBLE : View.GONE);
     }
+
+    private boolean isTwoPainel() {
+        return ((MoviesActivity)getActivity()).isTwoPainel();
+    }
+
+    public void restarLoader(){
+        getLoaderManager().restartLoader(LOADER_ID, null, this);
+    }
+
 }
