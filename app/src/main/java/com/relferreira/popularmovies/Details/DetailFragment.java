@@ -1,11 +1,15 @@
 package com.relferreira.popularmovies.Details;
 
 import android.content.ContentValues;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.TextViewCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,16 +20,29 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.relferreira.popularmovies.Api.MovieService;
+import com.relferreira.popularmovies.Api.MovieServiceClient;
 import com.relferreira.popularmovies.Model.Movie;
+import com.relferreira.popularmovies.Model.Review;
+import com.relferreira.popularmovies.Model.ReviewResponse;
+import com.relferreira.popularmovies.Model.Trailer;
+import com.relferreira.popularmovies.Model.TrailerResponse;
 import com.relferreira.popularmovies.R;
 import com.relferreira.popularmovies.data.MovieColumns;
 import com.relferreira.popularmovies.data.PopularMoviesProvider;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 /**
  * Created by renan on 12/05/2016.
  */
-public class DetailFragment extends Fragment {
+public class DetailFragment extends Fragment implements DetailAdapter.DetailListCallback{
 
     public static final String ARG_MOVIE = "arg_movie";
     private Movie movie;
@@ -35,6 +52,12 @@ public class DetailFragment extends Fragment {
     private TextView movieDuration;
     private TextView movieRating;
     private TextView movieSynopsis;
+    private String apiKey;
+    private RecyclerView list;
+
+    private List<Trailer> trailers = new ArrayList<>();
+    private List<Review> reviews = new ArrayList<>();
+    private DetailAdapter adapter;
 
     public static DetailFragment newInstance(Movie movie){
         Bundle bundle = new Bundle();
@@ -51,6 +74,7 @@ public class DetailFragment extends Fragment {
         setHasOptionsMenu(true);
 
         movie = getArguments().getParcelable(ARG_MOVIE);
+        apiKey = getResources().getString(R.string.api_key);
 
         findViewById(rootView);
         setValues();
@@ -76,23 +100,16 @@ public class DetailFragment extends Fragment {
 
     private void findViewById(View view){
 
-        movieTitle = (TextView) view.findViewById(R.id.detail_title);
-        movieImage = (ImageView) view.findViewById(R.id.detail_image);
-        movieDate = (TextView) view.findViewById(R.id.detail_date);
-        movieDuration = (TextView) view.findViewById(R.id.detail_duration);
-        movieRating = (TextView) view.findViewById(R.id.detail_rating);
-        movieSynopsis = (TextView) view.findViewById(R.id.detail_synopsis);
+        list = (RecyclerView) view.findViewById(R.id.detail_list);
+
     }
 
     private void setValues(){
-        movieTitle.setText(movie.getTitle());
-        movieDate.setText(movie.getReleaseDate());
-        movieRating.setText(String.valueOf(movie.getVoteAverage()));
-        movieSynopsis.setText(movie.getOverview());
-
-        Picasso.with(getContext())
-                .load(getContext().getString(R.string.api_images) + movie.getPosterPath())
-                .into(movieImage);
+        adapter = new DetailAdapter(getContext(), movie, trailers, reviews, this);
+        list.setLayoutManager(new LinearLayoutManager(getContext()));
+        list.setAdapter(adapter);
+        loadTrailers();
+        loadReviews();
     }
 
     private void setFavorite(){
@@ -107,4 +124,46 @@ public class DetailFragment extends Fragment {
                 new String[] { String.valueOf(movie.getId()) });
     }
 
+    private void loadTrailers(){
+        MovieServiceClient.getApi(getActivity()).listTrailers(movie.getId(), apiKey).enqueue(new Callback<TrailerResponse>() {
+            @Override
+            public void onResponse(Call<TrailerResponse> call, Response<TrailerResponse> response) {
+                TrailerResponse trailerResponse  = response.body();
+                if(trailerResponse != null){
+                    trailers.addAll(trailerResponse.getResults());
+                    adapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TrailerResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void loadReviews() {
+        MovieServiceClient.getApi(getContext()).listReviews(movie.getId(), apiKey).enqueue(new Callback<ReviewResponse>() {
+            @Override
+            public void onResponse(Call<ReviewResponse> call, Response<ReviewResponse> response) {
+                ReviewResponse reviewResponse = response.body();
+                if(reviewResponse != null) {
+                    reviews.addAll(reviewResponse.getResults());
+                    adapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReviewResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
+    @Override
+    public void trailerSelected(int position) {
+        Trailer trailer = trailers.get(position);
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + trailer.getKey()));
+        startActivity(intent);
+    }
 }

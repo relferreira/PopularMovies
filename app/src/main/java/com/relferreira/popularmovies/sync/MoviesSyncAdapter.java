@@ -129,10 +129,12 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         for (String type : types) {
             Call<MovieResponse> call = MovieServiceClient.getApi(context).listMovies(type, apiKey);
             MovieResponse movieResponse = call.execute().body();
-            List<Movie> responseMovies = movieResponse.getResults();
-            for (Movie movie : responseMovies)
-                movie.setType(type);
-            movies.addAll(responseMovies);
+            if(movieResponse != null) {
+                List<Movie> responseMovies = movieResponse.getResults();
+                for (Movie movie : responseMovies)
+                    movie.setType(type);
+                movies.addAll(responseMovies);
+            }
         }
 
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>(movies.size());
