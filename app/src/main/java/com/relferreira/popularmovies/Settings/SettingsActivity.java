@@ -1,4 +1,4 @@
-package com.relferreira.popularmovies.Settings;
+package com.relferreira.popularmovies.settings;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

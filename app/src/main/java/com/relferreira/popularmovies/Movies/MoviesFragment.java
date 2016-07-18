@@ -1,10 +1,8 @@
-package com.relferreira.popularmovies.Movies;
+package com.relferreira.popularmovies.movies;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -17,13 +15,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
-import com.relferreira.popularmovies.Details.DetailActivity;
-import com.relferreira.popularmovies.Model.Movie;
+import com.relferreira.popularmovies.model.Movie;
 import com.relferreira.popularmovies.R;
 import com.relferreira.popularmovies.data.MovieColumns;
 import com.relferreira.popularmovies.data.PopularMoviesProvider;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MoviesFragment extends Fragment implements MoviesListListener, LoaderManager.LoaderCallbacks<Cursor> {
@@ -36,8 +37,8 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
     private MoviesAdapter adapter;
     private ProgressBar loading;
     private Cursor data;
-    private int selectedMovie;
     private RecyclerView moviesList;
+    private LinearLayout emptyPlaceholder;
 
     public interface MoviesListCallback {
         void movieSelected(Movie movie);
@@ -57,15 +58,8 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
 
-        adapter = new MoviesAdapter(getContext(), null, isTwoPainel(), this);
-
-        loading = (ProgressBar) rootView.findViewById(R.id.movies_loading);
-
-        moviesList = (RecyclerView) rootView.findViewById(R.id.movies_list);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), NUM_COLUMNS);
-        gridLayoutManager.setAutoMeasureEnabled(false);
-        moviesList.setLayoutManager(gridLayoutManager);
-        moviesList.setAdapter(adapter);
+        findViewById(rootView);
+        setValues();
 
         return rootView;
     }
@@ -74,7 +68,7 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null && isTwoPainel()) {
-            selectedMovie = savedInstanceState.getInt(SELECTED_MOVIE);
+            int selectedMovie = savedInstanceState.getInt(SELECTED_MOVIE);
             adapter.setSelectedMovie(selectedMovie);
             adapter.notifyItemChanged(selectedMovie);
             moviesList.scrollToPosition(selectedMovie);
@@ -87,11 +81,27 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
         super.onResume();
     }
 
+    private void findViewById(View view) {
+
+        loading = (ProgressBar) view.findViewById(R.id.movies_loading);
+        emptyPlaceholder = (LinearLayout) view.findViewById(R.id.movies_empty);
+        moviesList = (RecyclerView) view.findViewById(R.id.movies_list);
+
+    }
+
+    private void setValues(){
+        adapter = new MoviesAdapter(getContext(), null, isTwoPainel(), this);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), NUM_COLUMNS);
+        gridLayoutManager.setAutoMeasureEnabled(false);
+        moviesList.setLayoutManager(gridLayoutManager);
+        moviesList.setAdapter(adapter);
+    }
 
     @Override
     public void onMovieSelect(int position) {
-        data.moveToPosition(position);
-        Movie movieSelected = Movie.fromCursor(data);
+        Movie movieSelected = null;
+        if(data.moveToPosition(position))
+            movieSelected = Movie.fromCursor(data);
         ((MoviesListCallback) getActivity()).movieSelected(movieSelected);
     }
 
@@ -103,12 +113,16 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
 
         String selection = null;
         String[] selectionArgs = null;
-        if(type.equals(getResources().getStringArray(R.array.pref_sorts_values)[2])){
+        if(type.equals("favorite")){
             selection = MovieColumns.FAVORITE + " = ?";
             selectionArgs = new String[] { String.valueOf(1) };
         } else {
-            selection = MovieColumns.TYPE + " = ?";
-            selectionArgs = new String[] { type };
+            selection = MovieColumns.TYPE + " = ? OR " + MovieColumns.TYPE + " = ?";
+            List<String> typesArgs = new ArrayList<>();
+
+            typesArgs.add((type.equals("popular")) ? String.valueOf(Movie.TYPE_POPULAR): String.valueOf(Movie.TYPE_RATED));
+            typesArgs.add(String.valueOf(Movie.TYPE_POPULAR_RATED));
+            selectionArgs = typesArgs.toArray(new String[typesArgs.size()]);
         }
         return new CursorLoader(
                 getActivity(),
@@ -122,14 +136,16 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         Log.i(TAG, "Finished loading movies");
+        int numberOfMovies = data.getCount();
         this.data = data;
         adapter.swapCursor(data);
+        emptyPlaceholder.setVisibility((numberOfMovies == 0) ? View.VISIBLE : View.GONE);
         if(isTwoPainel()) {
             Handler handler = new Handler();
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    onMovieSelect(selectedMovie);
+                    onMovieSelect(adapter.getSelectedMovie());
                 }
             });
         }
@@ -155,6 +171,8 @@ public class MoviesFragment extends Fragment implements MoviesListListener, Load
     }
 
     public void restarLoader(){
+        int selectedMovie = 0;
+        adapter.setSelectedMovie(selectedMovie);
         getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 

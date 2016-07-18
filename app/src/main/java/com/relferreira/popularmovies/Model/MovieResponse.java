@@ -1,4 +1,4 @@
-package com.relferreira.popularmovies.Model;
+package com.relferreira.popularmovies.model;
 
 import java.util.List;
 

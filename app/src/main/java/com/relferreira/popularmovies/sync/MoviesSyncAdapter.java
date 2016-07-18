@@ -15,16 +15,15 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.relferreira.popularmovies.Api.MovieServiceClient;
-import com.relferreira.popularmovies.Model.Movie;
-import com.relferreira.popularmovies.Model.MovieResponse;
+import com.relferreira.popularmovies.api.MovieServiceClient;
+import com.relferreira.popularmovies.model.Movie;
+import com.relferreira.popularmovies.model.MovieResponse;
 import com.relferreira.popularmovies.R;
 import com.relferreira.popularmovies.data.MovieColumns;
 import com.relferreira.popularmovies.data.PopularMoviesProvider;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -122,19 +121,38 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         Context context = getContext();
         String apiKey = context.getString(R.string.api_key);
 
-        ArrayList<String> types = new ArrayList<String>(Arrays.asList(context.getResources().getStringArray(R.array.pref_sorts_values)));
-        //remove favorites
-        types.remove(2);
         List<Movie> movies = new ArrayList<>();
-        for (String type : types) {
-            Call<MovieResponse> call = MovieServiceClient.getApi(context).listMovies(type, apiKey);
-            MovieResponse movieResponse = call.execute().body();
-            if(movieResponse != null) {
-                List<Movie> responseMovies = movieResponse.getResults();
-                for (Movie movie : responseMovies)
-                    movie.setType(type);
-                movies.addAll(responseMovies);
+        List<Movie> ratedMovies = new ArrayList<>();
+        Call<MovieResponse> call = MovieServiceClient.getApi(context).listMovies("popular", apiKey);
+        MovieResponse popularMovieResponse = call.execute().body();
+        if(popularMovieResponse != null){
+            List<Movie> responseMovies = popularMovieResponse.getResults();
+            for (Movie movie : responseMovies)
+                movie.setType(Movie.TYPE_POPULAR);
+            movies.addAll(responseMovies);
+        }
+
+        call = MovieServiceClient.getApi(context).listMovies("top_rated", apiKey);
+        MovieResponse ratedMovieResponse = call.execute().body();
+        if(ratedMovieResponse != null){
+            List<Movie> responseMovies = ratedMovieResponse.getResults();
+            for (Movie movie : responseMovies) {
+                movie.setType(Movie.TYPE_RATED);
             }
+            ratedMovies.addAll(responseMovies);
+        }
+
+        for (Movie ratedMovie : ratedMovies) {
+            boolean repeatedMovie = false;
+            for (Movie movie : movies) {
+                if(movie.getId() == ratedMovie.getId()) {
+                    movie.setType(Movie.TYPE_POPULAR_RATED);
+                    repeatedMovie = true;
+                    break;
+                }
+            }
+            if(!repeatedMovie)
+                movies.add(ratedMovie);
         }
 
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>(movies.size());
@@ -165,11 +183,6 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             ContentResolver contentResolver = context.getContentResolver();
             contentResolver.applyBatch(PopularMoviesProvider.AUTHORITY, batchOperations);
-
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
 
             contentResolver.delete(PopularMoviesProvider.Movies.CONTENT_URI,
                     MovieColumns.CREATED_AT + " < ? AND " + MovieColumns.FAVORITE + " != ?",

@@ -1,8 +1,8 @@
-package com.relferreira.popularmovies.Api;
+package com.relferreira.popularmovies.api;
 
-import com.relferreira.popularmovies.Model.MovieResponse;
-import com.relferreira.popularmovies.Model.ReviewResponse;
-import com.relferreira.popularmovies.Model.TrailerResponse;
+import com.relferreira.popularmovies.model.MovieResponse;
+import com.relferreira.popularmovies.model.ReviewResponse;
+import com.relferreira.popularmovies.model.TrailerResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

@@ -1,15 +1,16 @@
-package com.relferreira.popularmovies.Details;
+package com.relferreira.popularmovies.details;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.TextViewCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,23 +18,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.relferreira.popularmovies.Api.MovieService;
-import com.relferreira.popularmovies.Api.MovieServiceClient;
-import com.relferreira.popularmovies.Model.Movie;
-import com.relferreira.popularmovies.Model.Review;
-import com.relferreira.popularmovies.Model.ReviewResponse;
-import com.relferreira.popularmovies.Model.Trailer;
-import com.relferreira.popularmovies.Model.TrailerResponse;
+import com.relferreira.popularmovies.api.MovieServiceClient;
+import com.relferreira.popularmovies.model.Movie;
+import com.relferreira.popularmovies.model.Review;
+import com.relferreira.popularmovies.model.ReviewResponse;
+import com.relferreira.popularmovies.model.Trailer;
+import com.relferreira.popularmovies.model.TrailerResponse;
 import com.relferreira.popularmovies.R;
 import com.relferreira.popularmovies.data.MovieColumns;
 import com.relferreira.popularmovies.data.PopularMoviesProvider;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,6 +43,8 @@ import retrofit2.Response;
 public class DetailFragment extends Fragment implements DetailAdapter.DetailListCallback{
 
     public static final String ARG_MOVIE = "arg_movie";
+    public static final String ARG_TRAILERS = "arg_trailers";
+    public static final String ARG_REVIEWS = "arg_reviews";
     private Movie movie;
     private ImageView movieImage;
     private TextView movieDate;
@@ -55,9 +55,12 @@ public class DetailFragment extends Fragment implements DetailAdapter.DetailList
     private String apiKey;
     private RecyclerView list;
 
-    private List<Trailer> trailers = new ArrayList<>();
-    private List<Review> reviews = new ArrayList<>();
+    private ArrayList<Trailer> trailers = new ArrayList<>();
+    private ArrayList<Review> reviews = new ArrayList<>();
     private DetailAdapter adapter;
+    private LinearLayout emptyPlaceholder;
+    private ShareActionProvider shareActionProvider;
+    private boolean shareButtonActive = false;
 
     public static DetailFragment newInstance(Movie movie){
         Bundle bundle = new Bundle();
@@ -83,9 +86,37 @@ public class DetailFragment extends Fragment implements DetailAdapter.DetailList
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(savedInstanceState == null) {
+            loadTrailers();
+            loadReviews();
+        } else {
+            ArrayList<Review> savedReviews = savedInstanceState.getParcelableArrayList(ARG_REVIEWS);
+            ArrayList<Trailer> savedTrailers = savedInstanceState.getParcelableArrayList(ARG_TRAILERS);
+
+            reviews.addAll(savedReviews);
+            trailers.addAll(savedTrailers);
+            adapter.notifyDataSetChanged();
+            activateShareButton();
+
+        }
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_detail, menu);
         menu.findItem(R.id.action_favorite).setIcon((movie.isFavorite()) ? R.drawable.ic_star : R.drawable.ic_star_border);
+
+        MenuItem item = menu.findItem(R.id.action_share);
+        item.setVisible(false);
+        if(shareButtonActive){
+            item.setVisible(true);
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+            setShareIntent();
+        }
+
+        super.onCreateOptionsMenu(menu,inflater);
     }
 
     @Override
@@ -99,17 +130,13 @@ public class DetailFragment extends Fragment implements DetailAdapter.DetailList
     }
 
     private void findViewById(View view){
-
         list = (RecyclerView) view.findViewById(R.id.detail_list);
-
     }
 
     private void setValues(){
         adapter = new DetailAdapter(getContext(), movie, trailers, reviews, this);
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
-        loadTrailers();
-        loadReviews();
     }
 
     private void setFavorite(){
@@ -132,12 +159,13 @@ public class DetailFragment extends Fragment implements DetailAdapter.DetailList
                 if(trailerResponse != null){
                     trailers.addAll(trailerResponse.getResults());
                     adapter.notifyDataSetChanged();
+                    activateShareButton();
                 }
             }
 
             @Override
             public void onFailure(Call<TrailerResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
+
             }
         });
     }
@@ -163,7 +191,37 @@ public class DetailFragment extends Fragment implements DetailAdapter.DetailList
     @Override
     public void trailerSelected(int position) {
         Trailer trailer = trailers.get(position);
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + trailer.getKey()));
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getYoutubeUrl(trailer)));
         startActivity(intent);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(ARG_REVIEWS, reviews);
+        outState.putParcelableArrayList(ARG_TRAILERS, trailers);
+        super.onSaveInstanceState(outState);
+    }
+
+    private void activateShareButton() {
+        Activity activity = getActivity();
+        if(activity != null && trailers.size() > 0) {
+            shareButtonActive = true;
+            activity.invalidateOptionsMenu();
+        }
+    }
+
+    private void setShareIntent() {
+        if (shareActionProvider != null && trailers.size() > 0) {
+            Trailer trailer = trailers.get(0);
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, getYoutubeUrl(trailer));
+            shareActionProvider.setShareIntent(shareIntent);
+        }
+    }
+
+    private String getYoutubeUrl(Trailer trailer) {
+        return "http://www.youtube.com/watch?v=" + trailer.getKey();
     }
 }

@@ -1,13 +1,12 @@
-package com.relferreira.popularmovies.Details;
+package com.relferreira.popularmovies.details;
 
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.relferreira.popularmovies.Model.Movie;
+import com.relferreira.popularmovies.model.Movie;
 import com.relferreira.popularmovies.R;
 
 /**

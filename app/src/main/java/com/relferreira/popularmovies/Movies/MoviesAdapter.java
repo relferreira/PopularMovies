@@ -1,4 +1,4 @@
-package com.relferreira.popularmovies.Movies;
+package com.relferreira.popularmovies.movies;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -9,12 +9,10 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.relferreira.popularmovies.Model.Movie;
+import com.relferreira.popularmovies.model.Movie;
 import com.relferreira.popularmovies.R;
 import com.relferreira.popularmovies.util.CursorRecyclerViewAdapter;
 import com.squareup.picasso.Picasso;
-
-import java.util.List;
 
 /**
  * Created by renan on 10/05/2016.
@@ -40,8 +38,9 @@ public class MoviesAdapter extends CursorRecyclerViewAdapter<MoviesAdapter.Movie
         Movie movie = Movie.fromCursor(cursor);
         viewHolder.movieSelectIndicator.setVisibility((cursor.getPosition() == selectedMovie && twoPainel) ? View.VISIBLE : View.GONE);
         Picasso.with(viewHolder.movieImage.getContext())
-            .load(context.getString(R.string.api_images) + movie.getPosterPath())
-            .into(viewHolder.movieImage);
+                .load(context.getString(R.string.api_images) + movie.getPosterPath())
+                .error(R.drawable.ic_movie)
+                .into(viewHolder.movieImage);
     }
 
     @Override
@@ -50,6 +49,7 @@ public class MoviesAdapter extends CursorRecyclerViewAdapter<MoviesAdapter.Movie
 
         return new MovieViewHolder(view);
     }
+
 
     public int getSelectedMovie() {
         return selectedMovie;

@@ -1,4 +1,4 @@
-package com.relferreira.popularmovies.Model;
+package com.relferreira.popularmovies.model;
 
 import com.google.gson.annotations.SerializedName;
 

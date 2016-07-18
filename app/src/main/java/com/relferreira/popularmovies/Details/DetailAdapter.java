@@ -1,4 +1,4 @@
-package com.relferreira.popularmovies.Details;
+package com.relferreira.popularmovies.details;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -8,12 +8,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.relferreira.popularmovies.Model.Movie;
-import com.relferreira.popularmovies.Model.Review;
-import com.relferreira.popularmovies.Model.Trailer;
+import com.relferreira.popularmovies.model.Movie;
+import com.relferreira.popularmovies.model.Review;
+import com.relferreira.popularmovies.model.Trailer;
 import com.relferreira.popularmovies.R;
 import com.squareup.picasso.Picasso;
 
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,6 +29,9 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public static final int TYPE_DETAIL = 0;
     public static final int TYPE_TRAILER = 1;
     public static final int TYPE_REVIEW = 2;
+    private final DecimalFormat ratingFormat;
+    private final SimpleDateFormat storedDateFormat;
+    private final DateFormat dateFormat;
 
     private Context context;
     private Movie movie;
@@ -41,6 +49,9 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         this.trailers = trailers;
         this.reviews = reviews;
         this.listener = listener;
+        this.ratingFormat = new DecimalFormat("#.##");
+        this.storedDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        this.dateFormat = SimpleDateFormat.getDateInstance();
     }
 
     @Override
@@ -63,15 +74,20 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         int type = getItemViewType(position);
         if(type == TYPE_DETAIL){
-            MovieDetailViewHolder vh = (MovieDetailViewHolder) holder;
-            vh.movieTitle.setText(movie.getTitle());
-            vh.movieDate.setText(movie.getReleaseDate());
-            vh.movieRating.setText(String.valueOf(movie.getVoteAverage()));
-            vh.movieSynopsis.setText(movie.getOverview());
+            try {
+                MovieDetailViewHolder vh = (MovieDetailViewHolder) holder;
+                Date movieDate = storedDateFormat.parse(movie.getReleaseDate());
+                vh.movieTitle.setText(movie.getTitle());
+                vh.movieDate.setText(dateFormat.format(movieDate));
+                vh.movieRating.setText(context.getString(R.string.detail_rating, ratingFormat.format(movie.getVoteAverage())));
+                vh.movieSynopsis.setText(movie.getOverview());
 
-            Picasso.with(context)
-                    .load(context.getString(R.string.api_images) + movie.getPosterPath())
-                    .into(vh.movieImage);
+                Picasso.with(context)
+                        .load(context.getString(R.string.api_images) + movie.getPosterPath())
+                        .into(vh.movieImage);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         } else if (type == TYPE_TRAILER) {
             Trailer trailer = trailers.get(position - 1);
             MovieTrailerViewHolder vh = (MovieTrailerViewHolder) holder;

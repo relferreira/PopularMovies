@@ -1,4 +1,4 @@
-package com.relferreira.popularmovies.Api;
+package com.relferreira.popularmovies.api;
 
 import android.content.Context;
 import com.relferreira.popularmovies.R;

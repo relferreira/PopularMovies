@@ -31,8 +31,6 @@ public interface MovieColumns {
     String POSTER_PATH = "poster_path";
     @DataType(DataType.Type.INTEGER) @NotNull
     String ADULT =  "adult";
-//    @SerializedName("genre_ids")
-//    List<Integer> genreIds;
     @DataType(DataType.Type.TEXT) @NotNull
     String ORIGINAL_LANGUAGE = "original_language";
     @DataType(DataType.Type.TEXT)
@@ -49,6 +47,6 @@ public interface MovieColumns {
     String CREATED_AT = "created_at";
     @DataType(DataType.Type.INTEGER) @DefaultValue("0")
     String FAVORITE = "favorite";
-    @DataType(DataType.Type.TEXT) @NotNull
+    @DataType(DataType.Type.INTEGER) @NotNull
     String TYPE = "type";
 }

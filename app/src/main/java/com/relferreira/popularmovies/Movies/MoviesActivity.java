@@ -1,26 +1,20 @@
-package com.relferreira.popularmovies.Movies;
+package com.relferreira.popularmovies.movies;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.Toast;
 
-import com.relferreira.popularmovies.Details.DetailActivity;
-import com.relferreira.popularmovies.Details.DetailFragment;
-import com.relferreira.popularmovies.Model.Movie;
+import com.relferreira.popularmovies.details.DetailActivity;
+import com.relferreira.popularmovies.details.DetailFragment;
+import com.relferreira.popularmovies.model.Movie;
 import com.relferreira.popularmovies.R;
-import com.relferreira.popularmovies.Settings.SettingsActivity;
-import com.relferreira.popularmovies.data.PopularMoviesProvider;
+import com.relferreira.popularmovies.settings.SettingsActivity;
 import com.relferreira.popularmovies.sync.MoviesSyncAdapter;
 
 public class MoviesActivity extends AppCompatActivity implements MoviesFragment.MoviesListCallback{
@@ -31,6 +25,7 @@ public class MoviesActivity extends AppCompatActivity implements MoviesFragment.
     private String[] spinnerValues;
     private boolean twoPainel;
     private String sort;
+    private Movie displayedMovie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,10 +87,24 @@ public class MoviesActivity extends AppCompatActivity implements MoviesFragment.
     @Override
     public void movieSelected(Movie movie) {
         if(twoPainel) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.detail_container, DetailFragment.newInstance(movie), DETAILFRAGMENT_TAG)
-                    .commit();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            if(movie != null) {
+                if(this.displayedMovie == null || movie.getId() != this.displayedMovie.getId()) {
+                    fragmentManager
+                            .beginTransaction()
+                            .replace(R.id.detail_container, DetailFragment.newInstance(movie), DETAILFRAGMENT_TAG)
+                            .commit();
+                }
+            } else {
+                DetailFragment frag = (DetailFragment) fragmentManager.findFragmentByTag(DETAILFRAGMENT_TAG);
+                if(frag != null) {
+                    fragmentManager
+                            .beginTransaction()
+                            .remove(frag)
+                            .commit();
+                }
+            }
+            this.displayedMovie = movie;
         } else {
             Intent intent = new Intent(this, DetailActivity.class);
             intent.putExtra(DetailActivity.ARG_MOVIE, movie);

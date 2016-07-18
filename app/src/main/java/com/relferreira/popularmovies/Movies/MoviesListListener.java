@@ -1,4 +1,4 @@
-package com.relferreira.popularmovies.Movies;
+package com.relferreira.popularmovies.movies;
 
 /**
  * Created by renan on 11/05/2016.

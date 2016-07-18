@@ -1,4 +1,4 @@
-package com.relferreira.popularmovies.Model;
+package com.relferreira.popularmovies.model;
 
 import android.database.Cursor;
 import android.os.Parcel;
@@ -12,6 +12,10 @@ import java.util.List;
 
 
 public class Movie implements Parcelable {
+
+    public static final int TYPE_POPULAR = 1;
+    public static final int TYPE_RATED = 2;
+    public static final int TYPE_POPULAR_RATED = 3;
 
     @SerializedName("poster_path")
     private String posterPath;
@@ -35,7 +39,7 @@ public class Movie implements Parcelable {
     private boolean video;
     @SerializedName("vote_average")
     private float voteAverage;
-    private String type;
+    private int type;
     private boolean favorite;
 
     public Movie() {
@@ -153,11 +157,11 @@ public class Movie implements Parcelable {
         this.voteAverage = voteAverage;
     }
 
-    public String getType() {
+    public int getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(int type) {
         this.type = type;
     }
 
@@ -188,7 +192,7 @@ public class Movie implements Parcelable {
         movie.setVoteCount(cursor.getInt(cursor.getColumnIndex(MovieColumns.VOTE_COUNT)));
         movie.setVideo(cursor.getInt(cursor.getColumnIndex(MovieColumns.VIDEO)) == 1);
         movie.setVoteAverage(cursor.getFloat(cursor.getColumnIndex(MovieColumns.VOTE_AVERAGE)));
-        movie.setType(cursor.getString(cursor.getColumnIndex(MovieColumns.TYPE)));
+        movie.setType(cursor.getInt(cursor.getColumnIndex(MovieColumns.TYPE)));
         movie.setFavorite(cursor.getInt(cursor.getColumnIndex(MovieColumns.FAVORITE)) == 1);
 
         return movie;
@@ -214,7 +218,7 @@ public class Movie implements Parcelable {
         voteCount = in.readInt();
         video = in.readByte() != 0x00;
         voteAverage = in.readFloat();
-        type = in.readString();
+        type = in.readInt();
         favorite = in.readByte() != 0x00;
     }
 
@@ -244,7 +248,7 @@ public class Movie implements Parcelable {
         dest.writeInt(voteCount);
         dest.writeByte((byte) (video ? 0x01 : 0x00));
         dest.writeFloat(voteAverage);
-        dest.writeString(type);
+        dest.writeInt(type);
         dest.writeByte((byte) (favorite ? 0x01 : 0x00));
     }
 
