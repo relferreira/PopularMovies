@@ -1,15 +1,21 @@
-package com.relferreira.popularmovies.Model;
+package com.relferreira.popularmovies.model;
 
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
+import com.relferreira.popularmovies.data.MovieColumns;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class Movie implements Parcelable {
+
+    public static final int TYPE_POPULAR = 1;
+    public static final int TYPE_RATED = 2;
+    public static final int TYPE_POPULAR_RATED = 3;
 
     @SerializedName("poster_path")
     private String posterPath;
@@ -33,6 +39,11 @@ public class Movie implements Parcelable {
     private boolean video;
     @SerializedName("vote_average")
     private float voteAverage;
+    private int type;
+    private boolean favorite;
+
+    public Movie() {
+    }
 
     public String getPosterPath() {
         return posterPath;
@@ -146,6 +157,47 @@ public class Movie implements Parcelable {
         this.voteAverage = voteAverage;
     }
 
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    public void toggleFavorite(){
+        this.favorite = !this.favorite;
+    }
+
+    public static Movie fromCursor(Cursor cursor) {
+        Movie movie = new Movie();
+        movie.setPosterPath(cursor.getString(cursor.getColumnIndex(MovieColumns.POSTER_PATH)));
+        movie.setAdult(cursor.getInt(cursor.getColumnIndex(MovieColumns.ADULT)) == 1);
+        movie.setOverview(cursor.getString(cursor.getColumnIndex(MovieColumns.OVERVIEW)));
+        movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(MovieColumns.RELEASE_DATE)));
+        movie.setId(cursor.getInt(cursor.getColumnIndex(MovieColumns.MOVIE_ID)));
+        movie.setOriginalTitle(cursor.getString(cursor.getColumnIndex(MovieColumns.ORIGINAL_TITLE)));
+        movie.setOriginalLanguage(cursor.getString(cursor.getColumnIndex(MovieColumns.ORIGINAL_LANGUAGE)));
+        movie.setTitle(cursor.getString(cursor.getColumnIndex(MovieColumns.TITLE)));
+        movie.setBackdropPath(cursor.getString(cursor.getColumnIndex(MovieColumns.BACKDROP_PATH)));
+        movie.setPopularity(cursor.getFloat(cursor.getColumnIndex(MovieColumns.POPULARITY)));
+        movie.setVoteCount(cursor.getInt(cursor.getColumnIndex(MovieColumns.VOTE_COUNT)));
+        movie.setVideo(cursor.getInt(cursor.getColumnIndex(MovieColumns.VIDEO)) == 1);
+        movie.setVoteAverage(cursor.getFloat(cursor.getColumnIndex(MovieColumns.VOTE_AVERAGE)));
+        movie.setType(cursor.getInt(cursor.getColumnIndex(MovieColumns.TYPE)));
+        movie.setFavorite(cursor.getInt(cursor.getColumnIndex(MovieColumns.FAVORITE)) == 1);
+
+        return movie;
+    }
+
     protected Movie(Parcel in) {
         posterPath = in.readString();
         adult = in.readByte() != 0x00;
@@ -166,6 +218,8 @@ public class Movie implements Parcelable {
         voteCount = in.readInt();
         video = in.readByte() != 0x00;
         voteAverage = in.readFloat();
+        type = in.readInt();
+        favorite = in.readByte() != 0x00;
     }
 
     @Override
@@ -194,6 +248,8 @@ public class Movie implements Parcelable {
         dest.writeInt(voteCount);
         dest.writeByte((byte) (video ? 0x01 : 0x00));
         dest.writeFloat(voteAverage);
+        dest.writeInt(type);
+        dest.writeByte((byte) (favorite ? 0x01 : 0x00));
     }
 
     @SuppressWarnings("unused")

@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Popular Movies</string>
     <string name="action_settings">Settings</string>
+    <string name="action_share">Share Trailer</string>
+    <string name="action_favorite">Favorite</string>
 
     <string name="title_activity_settings">Settings</string>
     <string name="pref_sort_label">Sort</string>
@@ -14,5 +16,11 @@
     <string name="try_again">Something went wrong!</string>
     <string name="try_again_positive">Try Again</string>
     <string name="try_again_negative">Cancel</string>
+
+    <string name="sync_account_type">popularmovies.relferreira.com</string>
+    <string name="content_authority">com.relferreira.popularmovies</string>
+    <string name="no_movie_found">No movie found!</string>
+
+    <string name="detail_rating">%1$s/10</string>
 
 </resources>
